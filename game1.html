@@ -115,9 +115,16 @@ function update() {
     // Move obstacle
     obstacle.x -= obstacle.speed;
 
+    // Passed obstacle
     if (obstacle.x + obstacle.width < 0) {
         obstacle.x = 800;
         score++;
+
+        // Every 10 points, speed up obstacle & promotion
+        if (score % 10 === 0) {
+            obstacle.speed += 1; // Increase speed
+            alert("🎉 Promotion! Obstacle is faster now!");
+        }
     }
 
     // Collision
@@ -131,6 +138,16 @@ function update() {
         document.location.reload();
     }
 
+    drawPlayer();
+    drawObstacle();
+
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 700, 30);
+
+    requestAnimationFrame(update);
+}
+    
     drawPlayer();
     drawObstacle();
 
@@ -152,6 +169,7 @@ update();
 
 </body>
 </html>
+
 
 
 
