@@ -52,7 +52,8 @@ let obstacle = {
     speed: 6
 };
 
-let score = 0;
+let score = 0; let promotionTimer = 0;
+let showPromotion = false;
 
 function drawPlayer() {
     const x = player.x;
@@ -97,9 +98,8 @@ function drawPlayer() {
 function drawObstacle() {
     ctx.fillStyle = "red";
     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-}
-let promotionTimer = 0;
-let showPromotion = false;
+} 
+
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -187,15 +187,4 @@ update();
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
