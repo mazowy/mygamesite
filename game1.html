@@ -55,25 +55,45 @@ let obstacle = {
 let score = 0;
 
 function drawPlayer() {
-    // Legs (draw first)
-    ctx.fillStyle = "#2c3e50"; // Dark blue legs
-    ctx.fillRect(player.x + 8, player.y + player.height, 10, 15); // Left leg
-    ctx.fillRect(player.x + 22, player.y + player.height, 10, 15); // Right leg
+    const x = player.x;
+    const y = player.y;
+    const w = player.width;
+    const h = player.height;
 
-    // Body
-    ctx.fillStyle = "#3498db";
-    ctx.fillRect(player.x, player.y + 15, player.width, player.height - 15);
-
-    // Head
-    ctx.fillStyle = "#f1c40f";
-    ctx.fillRect(player.x + 8, player.y, 24, 20);
+    // Body (yellow circle)
+    ctx.fillStyle = "#f1c40f"; // yellow
+    ctx.beginPath();
+    ctx.ellipse(x + w/2, y + h/2, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.fill();
 
     // Eyes
     ctx.fillStyle = "black";
-    ctx.fillRect(player.x + 14, player.y + 5, 4, 4);
-    ctx.fillRect(player.x + 24, player.y + 5, 4, 4);
-}
+    ctx.beginPath();
+    ctx.arc(x + w/2 - 8, y + h/2 - 5, 3, 0, Math.PI * 2); // left eye
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + w/2 + 8, y + h/2 - 5, 3, 0, Math.PI * 2); // right eye
+    ctx.fill();
 
+    // Beak (orange triangle)
+    ctx.fillStyle = "#e67e22"; // orange
+    ctx.beginPath();
+    ctx.moveTo(x + w/2, y + h/2); // center front
+    ctx.lineTo(x + w/2 + 10, y + h/2 + 3); // bottom
+    ctx.lineTo(x + w/2 + 10, y + h/2 - 3); // top
+    ctx.closePath();
+    ctx.fill();
+
+    // Wings (small)
+    ctx.fillStyle = "#f39c12"; // darker yellow
+    ctx.beginPath();
+    ctx.ellipse(x + 5, y + h/2, 5, 12, Math.PI / 4, 0, Math.PI * 2); // left wing
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(x + w - 5, y + h/2, 5, 12, -Math.PI / 4, 0, Math.PI * 2); // right wing
+    ctx.fill();
+}
+    
 function drawObstacle() {
     ctx.fillStyle = "red";
     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
@@ -132,6 +152,7 @@ update();
 
 </body>
 </html>
+
 
 
 
