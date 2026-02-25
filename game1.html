@@ -67,8 +67,13 @@ function drawPlayer() {
     ctx.fillStyle = "black";
     ctx.fillRect(player.x + 14, player.y + 5, 4, 4);
     ctx.fillRect(player.x + 24, player.y + 5, 4, 4);
-}
 
+    // Legs
+    ctx.fillStyle = "#2c3e50"; // Dark blue legs
+    ctx.fillRect(player.x + 8, player.y + player.height, 10, 15);
+    ctx.fillRect(player.x + 22, player.y + player.height, 10, 15);
+}
+    
 function drawObstacle() {
     ctx.fillStyle = "red";
     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
@@ -127,5 +132,6 @@ update();
 
 </body>
 </html>
+
 
 
