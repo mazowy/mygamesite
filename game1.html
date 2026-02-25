@@ -54,42 +54,29 @@ let obstacle = {
 
 let score = 0;
 
-function drawPlayer()
-    // Body
+function drawPlayer() {
+    // Clear the old drawing of the player area (optional, but safe)
+    // ctx.clearRect(player.x - 5, player.y - 5, player.width + 30, player.height + 40);
+
+    // Draw legs first (so they appear behind body)
+    ctx.fillStyle = "#2c3e50"; // Dark blue legs
+    // Left leg
+    ctx.fillRect(player.x + 8, player.y + player.height, 10, 15);
+    // Right leg
+    ctx.fillRect(player.x + 22, player.y + player.height, 10, 15);
+
+    // Draw body
     ctx.fillStyle = "#3498db";
     ctx.fillRect(player.x, player.y + 15, player.width, player.height - 15);
 
-    // Head
+    // Draw head
     ctx.fillStyle = "#f1c40f";
     ctx.fillRect(player.x + 8, player.y, 24, 20);
 
-    // Eyes
+    // Draw eyes
     ctx.fillStyle = "black";
     ctx.fillRect(player.x + 14, player.y + 5, 4, 4);
     ctx.fillRect(player.x + 24, player.y + 5, 4, 4);
-
-    // Legs
-    ctx.fillStyle = "#2c3e50"; // Dark blue legs
-    ctx.fillRect(player.x + 8, player.y + player.height, 10, 15);
-    ctx.fillRect(player.x + 22, player.y + player.height, 10, 15);
-}
-    // Body
-    ctx.fillStyle = "#3498db";
-    ctx.fillRect(player.x, player.y + 15, player.width, player.height - 15);
-
-    // Head
-    ctx.fillStyle = "#f1c40f";
-    ctx.fillRect(player.x + 8, player.y, 24, 20);
-
-    // Eyes
-    ctx.fillStyle = "black";
-    ctx.fillRect(player.x + 14, player.y + 5, 4, 4);
-    ctx.fillRect(player.x + 24, player.y + 5, 4, 4);
-
-    // Legs
-    ctx.fillStyle = "#2c3e50"; // Dark blue legs
-    ctx.fillRect(player.x + 8, player.y + player.height, 10, 15);
-    ctx.fillRect(player.x + 22, player.y + player.height, 10, 15);
 }
     
 function drawObstacle() {
@@ -150,6 +137,7 @@ update();
 
 </body>
 </html>
+
 
 
 
