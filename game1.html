@@ -117,9 +117,17 @@ function update() {
     obstacle.x -= obstacle.speed;
 
     // Passed obstacle
-    if (obstacle.x + obstacle.width < 0) {
-        obstacle.x = 800;
-        score++;
+  if (obstacle.x + obstacle.width < 0) {
+    obstacle.x = 800;
+    score++;
+
+    // Every 10 points, speed up obstacle & show promotion
+    if (score % 10 === 0) {
+        obstacle.speed += 1; // laser gets faster
+        showPromotion = true; // turn on promotion message
+        promotionTimer = 120;  // show for ~2 seconds
+    }
+}
 
         // Every 10 points, speed up obstacle & promotion
         if (score % 10 === 0) {
@@ -146,6 +154,15 @@ function update() {
     ctx.font = "20px Arial";
     ctx.fillText("Score: " + score, 700, 30);
 
+    // Draw promotion message
+if (showPromotion) {
+    ctx.fillStyle = "yellow";
+    ctx.font = "30px Arial";
+    ctx.fillText("🎉 Promotion! Laser faster!", 250, 100);
+    promotionTimer--;
+    if (promotionTimer <= 0) showPromotion = false;
+}
+    
     requestAnimationFrame(update);
 }
     
@@ -170,6 +187,7 @@ update();
 
 </body>
 </html>
+
 
 
 
