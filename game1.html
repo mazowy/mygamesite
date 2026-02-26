@@ -3,9 +3,14 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.style.background = "black"; // Black background
+canvas.style.background = "black";
 
 let gameOver = false;
+let explosionParticles = [];
+
+/* 🔊 SOUND EFFECTS */
+const jumpSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3");
+const boomSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3");
 
 let player = { 
     x: 100, 
@@ -15,7 +20,8 @@ let player = {
     dy: 0, 
     gravity: 0.6, 
     jumpPower: -12, 
-    grounded: true 
+    grounded: true,
+    wingAngle: 0
 };
 
 let obstacle = { 
@@ -28,12 +34,25 @@ let obstacle = {
 
 let score = 0;
 
+/* ===== DRAW GROUND ===== */
 function drawGround() {
     ctx.fillStyle = "white";
-    ctx.fillRect(0, 300, canvas.width, 100); // Big white stripe
+    ctx.fillRect(0, 300, canvas.width, 100);
 }
 
+/* ===== DRAW BIRD WITH FLAPPING WINGS ===== */
 function drawBird() {
+
+    // Wing animation
+    player.wingAngle += 0.2;
+    let wingOffset = Math.sin(player.wingAngle) * 10;
+
+    // Wing
+    ctx.fillStyle = "orange";
+    ctx.beginPath();
+    ctx.ellipse(player.x + 10, player.y + 20, 15, 8 + wingOffset, 0, 0, Math.PI * 2);
+    ctx.fill();
+
     // Body
     ctx.fillStyle = "yellow";
     ctx.beginPath();
@@ -56,11 +75,38 @@ function drawBird() {
     ctx.fill();
 }
 
+/* ===== DRAW LASER ===== */
 function drawLaser() {
     ctx.fillStyle = "red";
     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 }
 
+/* ===== EXPLOSION EFFECT ===== */
+function createExplosion(x, y) {
+    for (let i = 0; i < 25; i++) {
+        explosionParticles.push({
+            x: x,
+            y: y,
+            dx: (Math.random() - 0.5) * 6,
+            dy: (Math.random() - 0.5) * 6,
+            radius: Math.random() * 5 + 2
+        });
+    }
+}
+
+function drawExplosion() {
+    ctx.fillStyle = "orange";
+    explosionParticles.forEach(p => {
+        p.x += p.dx;
+        p.y += p.dy;
+        p.radius *= 0.95;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+/* ===== RESTART BUTTON ===== */
 function drawRestartButton() {
     ctx.fillStyle = "white";
     ctx.fillRect(300, 150, 200, 60);
@@ -70,6 +116,7 @@ function drawRestartButton() {
     ctx.fillText("RESTART", 330, 190);
 }
 
+/* ===== GAME LOOP ===== */
 function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -101,6 +148,8 @@ function update() {
             player.y + player.height > obstacle.y
         ) {
             gameOver = true;
+            boomSound.play();
+            createExplosion(player.x + 20, player.y + 20);
         }
 
         drawBird();
@@ -112,12 +161,11 @@ function update() {
 
     } else {
 
-        drawBird();
-        drawLaser();
+        drawExplosion();
 
         ctx.fillStyle = "white";
         ctx.font = "40px Arial";
-        ctx.fillText("GAME OVER", 270, 120);
+        ctx.fillText("GAME OVER", 250, 120);
 
         drawRestartButton();
     }
@@ -125,13 +173,16 @@ function update() {
     requestAnimationFrame(update);
 }
 
+/* ===== CONTROLS ===== */
 document.addEventListener("keydown", function(e) {
     if (e.code === "Space" && player.grounded && !gameOver) {
         player.dy = player.jumpPower;
         player.grounded = false;
+        jumpSound.play();
     }
 });
 
+/* ===== RESTART CLICK ===== */
 canvas.addEventListener("click", function(e) {
     if (gameOver) {
         const rect = canvas.getBoundingClientRect();
@@ -139,12 +190,12 @@ canvas.addEventListener("click", function(e) {
         const mouseY = e.clientY - rect.top;
 
         if (mouseX > 300 && mouseX < 500 && mouseY > 150 && mouseY < 210) {
-            // Restart
             score = 0;
             obstacle.x = 800;
             player.y = 260;
             player.dy = 0;
             gameOver = false;
+            explosionParticles = [];
         }
     }
 });
