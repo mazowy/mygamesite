@@ -1,135 +1,169 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-let player = {
-    x: 50,
-    y: 300,
-    width: 40,
-    height: 40,
-    dy: 0,
-    gravity: 0.6,
-    jumpPower: -12,
-    grounded: true
-};
-
-let obstacle = {
-    x: 800,
-    y: 320,
-    width: 30,
-    height: 80,
-    speed: 6
-};
-
-let score = 0;
-let promotionTimer = 0;
-let showPromotion = false;
-
-// Draw yellow bird
-function drawPlayer() {
-    const x = player.x;
-    const y = player.y;
-    const w = player.width;
-    const h = player.height;
-
-    // Body
-    ctx.fillStyle = "#f1c40f";
-    ctx.beginPath();
-    ctx.ellipse(x + w/2, y + h/2, w/2, h/2, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // Eyes
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.arc(x + w/2 - 8, y + h/2 - 5, 3, 0, Math.PI*2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x + w/2 + 8, y + h/2 - 5, 3, 0, Math.PI*2);
-    ctx.fill();
-
-    // Beak
-    ctx.fillStyle = "#e67e22";
-    ctx.beginPath();
-    ctx.moveTo(x + w/2, y + h/2);
-    ctx.lineTo(x + w/2 + 10, y + h/2 + 3);
-    ctx.lineTo(x + w/2 + 10, y + h/2 - 3);
-    ctx.closePath();
-    ctx.fill();
-}
-
-// Draw red laser obstacle
-function drawObstacle() {
-    ctx.fillStyle = "red";
-    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-}
-
-// Game loop
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Gravity
-    player.dy += player.gravity;
-    player.y += player.dy;
-
-    if (player.y >= 300) {
-        player.y = 300;
-        player.dy = 0;
-        player.grounded = true;
-    }
-
-    // Move obstacle
-    obstacle.x -= obstacle.speed;
-
-    // Passed obstacle
-    if (obstacle.x + obstacle.width < 0) {
-        obstacle.x = 800;
-        score++;
-
-        // Every 10 points, speed up obstacle & promotion
-        if (score % 10 === 0) {
-            obstacle.speed += 1;
-            showPromotion = true;
-            promotionTimer = 120; // ~2 sec
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Super Jump Game</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
         }
+        canvas {
+            background: #222;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid white;
+        }
+        h1 {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎮 Super Jump Game</h1>
+<p>Press SPACE to jump</p>
+
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+
+<script>
+window.onload = function() {
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let player = {
+        x: 50,
+        y: 300,
+        width: 40,
+        height: 40,
+        dy: 0,
+        gravity: 0.6,
+        jumpPower: -12,
+        grounded: true
+    };
+
+    let obstacle = {
+        x: 800,
+        y: 320,
+        width: 30,
+        height: 80,
+        speed: 6
+    };
+
+    let score = 0;
+    let promotionTimer = 0;
+    let showPromotion = false;
+
+    function drawPlayer() {
+        const x = player.x;
+        const y = player.y;
+        const w = player.width;
+        const h = player.height;
+
+        // Body
+        ctx.fillStyle = "#f1c40f";
+        ctx.beginPath();
+        ctx.ellipse(x + w/2, y + h/2, w/2, h/2, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.arc(x + w/2 - 8, y + h/2 - 5, 3, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + w/2 + 8, y + h/2 - 5, 3, 0, Math.PI*2);
+        ctx.fill();
+
+        // Beak
+        ctx.fillStyle = "#e67e22";
+        ctx.beginPath();
+        ctx.moveTo(x + w/2, y + h/2);
+        ctx.lineTo(x + w/2 + 10, y + h/2 + 3);
+        ctx.lineTo(x + w/2 + 10, y + h/2 - 3);
+        ctx.closePath();
+        ctx.fill();
     }
 
-    // Collision
-    if (
-        player.x < obstacle.x + obstacle.width &&
-        player.x + player.width > obstacle.x &&
-        player.y < obstacle.y + obstacle.height &&
-        player.y + player.height > obstacle.y
-    ) {
-        alert("Game Over! Score: " + score);
-        document.location.reload();
+    function drawObstacle() {
+        ctx.fillStyle = "red";
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     }
 
-    // Draw player and obstacle
-    drawPlayer();
-    drawObstacle();
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Score
-    ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, 700, 30);
+        // Gravity
+        player.dy += player.gravity;
+        player.y += player.dy;
 
-    // Promotion message
-    if (showPromotion) {
-        ctx.fillStyle = "yellow";
-        ctx.font = "30px Arial";
-        ctx.fillText("🎉 Promotion! Laser faster!", 200, 100);
-        promotionTimer--;
-        if (promotionTimer <= 0) showPromotion = false;
+        if (player.y >= 300) {
+            player.y = 300;
+            player.dy = 0;
+            player.grounded = true;
+        }
+
+        // Move obstacle
+        obstacle.x -= obstacle.speed;
+
+        // Passed obstacle
+        if (obstacle.x + obstacle.width < 0) {
+            obstacle.x = 800;
+            score++;
+
+            // Every 10 points, speed up obstacle & show promotion
+            if (score % 10 === 0) {
+                obstacle.speed += 1;
+                showPromotion = true;
+                promotionTimer = 120; // ~2 seconds
+            }
+        }
+
+        // Collision
+        if (
+            player.x < obstacle.x + obstacle.width &&
+            player.x + player.width > obstacle.x &&
+            player.y < obstacle.y + obstacle.height &&
+            player.y + player.height > obstacle.y
+        ) {
+            alert("Game Over! Score: " + score);
+            document.location.reload();
+        }
+
+        // Draw everything
+        drawPlayer();
+        drawObstacle();
+
+        // Score
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.fillText("Score: " + score, 700, 30);
+
+        // Promotion
+        if (showPromotion) {
+            ctx.fillStyle = "yellow";
+            ctx.font = "30px Arial";
+            ctx.fillText("🎉 Promotion! Laser faster!", 200, 100);
+            promotionTimer--;
+            if (promotionTimer <= 0) showPromotion = false;
+        }
+
+        requestAnimationFrame(update);
     }
 
-    requestAnimationFrame(update);
+    document.addEventListener("keydown", function(e) {
+        if (e.code === "Space" && player.grounded) {
+            player.dy = player.jumpPower;
+            player.grounded = false;
+        }
+    });
+
+    update();
 }
+</script>
 
-// Jump
-document.addEventListener("keydown", function(e) {
-    if (e.code === "Space" && player.grounded) {
-        player.dy = player.jumpPower;
-        player.grounded = false;
-    }
-});
-
-update();
+</body>
+</html>
