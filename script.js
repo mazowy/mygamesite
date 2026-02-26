@@ -1,60 +1,54 @@
-// Get canvas
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+window.onload = function() {
 
-// Make canvas fullscreen (works on phone + laptop)
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    // Get canvas
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
-window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-});
 
-// Bird
-const bird = {
-    x: 100,
-    y: canvas.height / 2,
-    width: 40,
-    height: 40,
-    velocity: 0,
-    gravity: 0.6
-};
+    window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
 
-// Jump function
-function jump() {
-    bird.velocity = -10;
-}
+    const bird = {
+        x: 100,
+        y: canvas.height / 2,
+        width: 40,
+        height: 40,
+        velocity: 0,
+        gravity: 0.6
+    };
 
-// 🎮 Keyboard (Laptop)
-document.addEventListener("keydown", function(e) {
-    if (e.code === "Space") {
-        jump();
+    function jump() {
+        bird.velocity = -10;
     }
-});
 
-// 🖱 Mouse (Laptop)
-canvas.addEventListener("click", jump);
+    document.addEventListener("keydown", function(e) {
+        if (e.code === "Space") {
+            jump();
+        }
+    });
 
-// 📱 Touch (Phone / Tablet)
-canvas.addEventListener("touchstart", function(e) {
-    e.preventDefault();
-    jump();
-});
+    canvas.addEventListener("click", jump);
 
-// Game Loop
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        jump();
+    });
 
-    // Apply gravity
-    bird.velocity += bird.gravity;
-    bird.y += bird.velocity;
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw bird
-    ctx.fillStyle = "yellow";
-    ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+        bird.velocity += bird.gravity;
+        bird.y += bird.velocity;
 
-    requestAnimationFrame(update);
-}
+        ctx.fillStyle = "yellow";
+        ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
 
-update();
+        requestAnimationFrame(update);
+    }
+
+    update();
+};
