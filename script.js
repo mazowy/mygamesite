@@ -9,29 +9,33 @@ window.onload = function () {
     window.addEventListener("resize", () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        groundY = canvas.height - 80;
     });
 
-    // 🐤 Bird (Round)
+    // 🟫 Floor
+    let groundHeight = 80;
+    let groundY = canvas.height - groundHeight;
+
+    // 🐤 Bird
     const bird = {
         x: 120,
         y: canvas.height / 2,
         radius: 20,
         velocity: 0,
-        gravity: 0.6,
-        jumpPower: -10
+        gravity: 0.7,
+        jumpPower: -12
     };
 
     function jump() {
         bird.velocity = bird.jumpPower;
     }
 
-    // Controls (Laptop + Phone)
+    // Controls
     document.addEventListener("keydown", e => {
         if (e.code === "Space") jump();
     });
 
     canvas.addEventListener("click", jump);
-
     canvas.addEventListener("touchstart", e => {
         e.preventDefault();
         jump();
@@ -39,39 +43,29 @@ window.onload = function () {
 
     // 🔴 Lasers
     let lasers = [];
-    let laserWidth = 40;
-    let laserGap = 200;
-    let laserSpeed = 4;
+    let laserWidth = 30;
+    let laserHeight = 150;
+    let laserSpeed = 5;
 
     function spawnLaser() {
-        let topHeight = Math.random() * (canvas.height - laserGap - 100) + 50;
+        let yPosition = Math.random() * (groundY - laserHeight - 50) + 50;
 
         lasers.push({
             x: canvas.width,
-            topHeight: topHeight
+            y: yPosition
         });
     }
 
     setInterval(spawnLaser, 1500);
 
-    // 📈 Score
+    // Score
     let score = 0;
-    let promotionText = "";
     let showPromotion = false;
-
-    function showPromotionMessage() {
-        promotionText = "PROMOTION!";
-        showPromotion = true;
-
-        setTimeout(() => {
-            showPromotion = false;
-        }, 1000);
-    }
 
     function resetGame() {
         lasers = [];
         score = 0;
-        laserSpeed = 4;
+        laserSpeed = 5;
         bird.y = canvas.height / 2;
         bird.velocity = 0;
     }
@@ -83,10 +77,20 @@ window.onload = function () {
         bird.velocity += bird.gravity;
         bird.y += bird.velocity;
 
-        // Ground / ceiling collision
-        if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
+        // Floor collision
+        if (bird.y + bird.radius > groundY) {
             resetGame();
         }
+
+        // Ceiling collision
+        if (bird.y - bird.radius < 0) {
+            bird.y = bird.radius;
+            bird.velocity = 0;
+        }
+
+        // Draw floor
+        ctx.fillStyle = "#444";
+        ctx.fillRect(0, groundY, canvas.width, groundHeight);
 
         // Draw bird
         ctx.beginPath();
@@ -94,31 +98,21 @@ window.onload = function () {
         ctx.fillStyle = "yellow";
         ctx.fill();
 
-        // Move and draw lasers
+        // Move lasers
         for (let i = 0; i < lasers.length; i++) {
             let laser = lasers[i];
             laser.x -= laserSpeed;
 
-            // Top laser
+            // Draw laser
             ctx.fillStyle = "red";
-            ctx.fillRect(laser.x, 0, laserWidth, laser.topHeight);
-
-            // Bottom laser
-            ctx.fillRect(
-                laser.x,
-                laser.topHeight + laserGap,
-                laserWidth,
-                canvas.height - laser.topHeight - laserGap
-            );
+            ctx.fillRect(laser.x, laser.y, laserWidth, laserHeight);
 
             // Collision
             if (
                 bird.x + bird.radius > laser.x &&
                 bird.x - bird.radius < laser.x + laserWidth &&
-                (
-                    bird.y - bird.radius < laser.topHeight ||
-                    bird.y + bird.radius > laser.topHeight + laserGap
-                )
+                bird.y + bird.radius > laser.y &&
+                bird.y - bird.radius < laser.y + laserHeight
             ) {
                 resetGame();
             }
@@ -128,13 +122,16 @@ window.onload = function () {
                 score++;
 
                 if (score % 10 === 0) {
-                    laserSpeed += 1;   // ⚡ Increase speed
-                    showPromotionMessage();
+                    laserSpeed += 1;
+                    showPromotion = true;
+
+                    setTimeout(() => {
+                        showPromotion = false;
+                    }, 1000);
                 }
             }
         }
 
-        // Remove off-screen lasers
         lasers = lasers.filter(laser => laser.x + laserWidth > 0);
 
         // Draw score
@@ -146,7 +143,7 @@ window.onload = function () {
         if (showPromotion) {
             ctx.fillStyle = "gold";
             ctx.font = "50px Arial";
-            ctx.fillText(promotionText, canvas.width / 2 - 150, 100);
+            ctx.fillText("PROMOTION!", canvas.width / 2 - 170, 100);
         }
 
         requestAnimationFrame(update);
