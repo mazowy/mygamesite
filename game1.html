@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>jumping game</title>
-</head>
-<body>
-
-<canvas id="gameCanvas" width="800" height="400"></canvas>
-
 <script>
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+canvas.style.background = "black"; // Black background
+
+let gameOver = false;
+
 let player = { 
-    x: 50, 
-    y: 300, 
+    x: 100, 
+    y: 250, 
     width: 40, 
     height: 40, 
     dy: 0, 
@@ -25,72 +20,135 @@ let player = {
 
 let obstacle = { 
     x: 800, 
-    y: 320, 
-    width: 30, 
-    height: 80, 
+    y: 240, 
+    width: 20, 
+    height: 100, 
     speed: 6 
 };
 
 let score = 0;
 
-function drawPlayer() {
-    ctx.fillStyle = "#f1c40f";
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+function drawGround() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 300, canvas.width, 100); // Big white stripe
 }
 
-function drawObstacle() {
+function drawBird() {
+    // Body
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(player.x + 20, player.y + 20, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.arc(player.x + 28, player.y + 15, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Beak
+    ctx.fillStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(player.x + 40, player.y + 20);
+    ctx.lineTo(player.x + 55, player.y + 15);
+    ctx.lineTo(player.x + 55, player.y + 25);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function drawLaser() {
     ctx.fillStyle = "red";
     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 }
 
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    player.dy += player.gravity;
-    player.y += player.dy;
-
-    if (player.y > 300) {
-        player.y = 300;
-        player.dy = 0;
-        player.grounded = true;
-    }
-
-    obstacle.x -= obstacle.speed;
-    if (obstacle.x < -obstacle.width) {
-        obstacle.x = 800;
-        score++;
-    }
-
-    if (
-        player.x < obstacle.x + obstacle.width &&
-        player.x + player.width > obstacle.x &&
-        player.y < obstacle.y + obstacle.height &&
-        player.y + player.height > obstacle.y
-    ) {
-        alert("Game Over! Score: " + score);
-        document.location.reload();
-    }
+function drawRestartButton() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(300, 150, 200, 60);
 
     ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, 20, 30);
+    ctx.font = "30px Arial";
+    ctx.fillText("RESTART", 330, 190);
+}
 
-    drawPlayer();
-    drawObstacle();
+function update() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawGround();
+
+    if (!gameOver) {
+
+        player.dy += player.gravity;
+        player.y += player.dy;
+
+        if (player.y > 260) {
+            player.y = 260;
+            player.dy = 0;
+            player.grounded = true;
+        }
+
+        obstacle.x -= obstacle.speed;
+        if (obstacle.x < -obstacle.width) {
+            obstacle.x = 800;
+            score++;
+        }
+
+        // Collision
+        if (
+            player.x < obstacle.x + obstacle.width &&
+            player.x + player.width > obstacle.x &&
+            player.y < obstacle.y + obstacle.height &&
+            player.y + player.height > obstacle.y
+        ) {
+            gameOver = true;
+        }
+
+        drawBird();
+        drawLaser();
+
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.fillText("Score: " + score, 20, 40);
+
+    } else {
+
+        drawBird();
+        drawLaser();
+
+        ctx.fillStyle = "white";
+        ctx.font = "40px Arial";
+        ctx.fillText("GAME OVER", 270, 120);
+
+        drawRestartButton();
+    }
 
     requestAnimationFrame(update);
 }
 
 document.addEventListener("keydown", function(e) {
-    if (e.code === "Space" && player.grounded) {
+    if (e.code === "Space" && player.grounded && !gameOver) {
         player.dy = player.jumpPower;
         player.grounded = false;
+    }
+});
+
+canvas.addEventListener("click", function(e) {
+    if (gameOver) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        if (mouseX > 300 && mouseX < 500 && mouseY > 150 && mouseY < 210) {
+            // Restart
+            score = 0;
+            obstacle.x = 800;
+            player.y = 260;
+            player.dy = 0;
+            gameOver = false;
+        }
     }
 });
 
 update();
 
 </script>
-
-</body>
-</html>
