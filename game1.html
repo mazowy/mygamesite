@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jump Bird</title>
+    <title>Bird Laser Game</title>
     <style>
         body {
             margin: 0;
             background: black;
         }
+
         canvas {
             display: block;
             margin: auto;
@@ -23,9 +24,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-let gameOver = false;
 let score = 0;
-let particles = [];
+let gameOver = false;
+let promotionLevel = 0;
 
 let player = {
     x: 120,
@@ -46,6 +47,8 @@ let obstacle = {
     speed: 6
 };
 
+/* ================= DRAW FUNCTIONS ================= */
+
 function drawGround() {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 300, canvas.width, 100);
@@ -56,19 +59,31 @@ function drawBird() {
     player.wing += 0.2;
     let wingSize = Math.sin(player.wing) * 8;
 
+    // Wing
     ctx.fillStyle = "orange";
     ctx.beginPath();
     ctx.ellipse(player.x - 10, player.y, 18, 8 + wingSize, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // Body
     ctx.fillStyle = "yellow";
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
     ctx.fill();
 
+    // Eye
     ctx.fillStyle = "black";
     ctx.beginPath();
     ctx.arc(player.x + 8, player.y - 5, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Beak
+    ctx.fillStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(player.x + 20, player.y);
+    ctx.lineTo(player.x + 35, player.y - 5);
+    ctx.lineTo(player.x + 35, player.y + 5);
+    ctx.closePath();
     ctx.fill();
 }
 
@@ -77,34 +92,13 @@ function drawLaser() {
     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 }
 
-function createExplosion(x, y) {
-    for (let i = 0; i < 25; i++) {
-        particles.push({
-            x: x,
-            y: y,
-            dx: (Math.random() - 0.5) * 6,
-            dy: (Math.random() - 0.5) * 6,
-            size: Math.random() * 5 + 2
-        });
-    }
+function drawScore() {
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 20, 30);
 }
 
-function drawExplosion() {
-    ctx.fillStyle = "orange";
-    particles.forEach(p => {
-        p.x += p.dx;
-        p.y += p.dy;
-        p.size *= 0.95;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    particles = particles.filter(p => p.size > 0.5);
-}
-
-function drawRestart() {
+function drawRestartButton() {
     ctx.fillStyle = "white";
     ctx.fillRect(300, 150, 200, 60);
 
@@ -113,6 +107,8 @@ function drawRestart() {
     ctx.fillText("RESTART", 340, 188);
 }
 
+/* ================= GAME LOOP ================= */
+
 function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -120,6 +116,7 @@ function update() {
 
     if (!gameOver) {
 
+        // Physics
         player.dy += player.gravity;
         player.y += player.dy;
 
@@ -129,13 +126,22 @@ function update() {
             player.grounded = true;
         }
 
+        // Move laser
         obstacle.x -= obstacle.speed;
 
         if (obstacle.x < -obstacle.width) {
             obstacle.x = 800;
             score++;
+
+            // Promotion every 10 score
+            if (score % 10 === 0) {
+                promotionLevel++;
+                obstacle.speed += 1;   // Laser gets faster
+                alert("🔥 PROMOTION! Level " + promotionLevel + "\nLaser Speed Increased!");
+            }
         }
 
+        // Collision
         if (
             player.x + player.radius > obstacle.x &&
             player.x - player.radius < obstacle.x + obstacle.width &&
@@ -143,29 +149,25 @@ function update() {
             player.y - player.radius < obstacle.y + obstacle.height
         ) {
             gameOver = true;
-            createExplosion(player.x, player.y);
         }
 
         drawBird();
         drawLaser();
-
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.fillText("Score: " + score, 20, 30);
+        drawScore();
 
     } else {
-
-        drawExplosion();
 
         ctx.fillStyle = "white";
         ctx.font = "40px Arial";
         ctx.fillText("GAME OVER", 250, 110);
 
-        drawRestart();
+        drawRestartButton();
     }
 
     requestAnimationFrame(update);
 }
+
+/* ================= CONTROLS ================= */
 
 document.addEventListener("keydown", function(e) {
     if (e.code === "Space" && player.grounded && !gameOver) {
@@ -173,6 +175,8 @@ document.addEventListener("keydown", function(e) {
         player.grounded = false;
     }
 });
+
+/* ================= RESTART ================= */
 
 canvas.addEventListener("click", function(e) {
 
@@ -183,12 +187,14 @@ canvas.addEventListener("click", function(e) {
     const my = e.clientY - rect.top;
 
     if (mx > 300 && mx < 500 && my > 150 && my < 210) {
+
         score = 0;
+        promotionLevel = 0;
+        obstacle.speed = 6;
         obstacle.x = 800;
         player.y = 280;
         player.dy = 0;
         player.grounded = true;
-        particles = [];
         gameOver = false;
     }
 });
