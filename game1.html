@@ -1,33 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Game</title>
+    <title>jumping game</title>
 </head>
 <body>
 
 <canvas id="gameCanvas" width="800" height="400"></canvas>
 
 <script>
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-let player = {
-    x: 50,
-    y: 300,
-    width: 40,
-    height: 40,
-    dy: 0,
-    gravity: 0.6,
-    jumpPower: -12,
-    grounded: true
+let player = { 
+    x: 50, 
+    y: 300, 
+    width: 40, 
+    height: 40, 
+    dy: 0, 
+    gravity: 0.6, 
+    jumpPower: -12, 
+    grounded: true 
 };
 
-let obstacle = {
-    x: 800,
-    y: 320,
-    width: 30,
-    height: 80,
-    speed: 6
+let obstacle = { 
+    x: 800, 
+    y: 320, 
+    width: 30, 
+    height: 80, 
+    speed: 6 
 };
 
 let score = 0;
@@ -60,7 +61,6 @@ function update() {
         score++;
     }
 
-    // collision
     if (
         player.x < obstacle.x + obstacle.width &&
         player.x + player.width > obstacle.x &&
@@ -70,6 +70,10 @@ function update() {
         alert("Game Over! Score: " + score);
         document.location.reload();
     }
+
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 20, 30);
 
     drawPlayer();
     drawObstacle();
@@ -85,6 +89,7 @@ document.addEventListener("keydown", function(e) {
 });
 
 update();
+
 </script>
 
 </body>
